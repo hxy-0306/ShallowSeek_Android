@@ -1,0 +1,17 @@
+title = ShallowSeek
+package.name = shallowseek
+package.domain = org.local
+source.dir = .
+source.include_exts = py,png,jpg,kv,atlas
+version = 1.3
+
+requirements = python3,kivy>=2.3.0
+
+orientation = portrait
+fullscreen = 0
+
+android.api = 33
+android.minapi = 21
+android.archs = arm64-v8a, armeabi-v7a
+
+android.permissions = 
