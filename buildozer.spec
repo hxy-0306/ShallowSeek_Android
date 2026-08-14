@@ -1,3 +1,5 @@
+[app]
+
 title = ShallowSeek
 package.name = shallowseek
 package.domain = org.local
