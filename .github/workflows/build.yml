@@ -1,16 +1,35 @@
 name: Build APK
-on: [push, workflow_dispatch]
+on:
+  push:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install buildozer cython
-      - run: buildozer android debug
-      - uses: actions/upload-artifact@v4
+
+      - name: Install system deps
+        run: |
+          sudo apt update
+          sudo apt install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev openjdk-17-jdk unzip zip
+
+      - name: Install buildozer
+        run: pip install --upgrade buildozer cython
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sudo $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Build debug APK
+        run: buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: apk
           path: bin/*.apk
