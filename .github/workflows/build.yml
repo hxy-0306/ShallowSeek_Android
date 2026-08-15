@@ -40,6 +40,14 @@ jobs:
           pip install git+https://github.com/kivy/buildozer
           pip install legacy-cgi setuptools cython==0.29.34
 
+      - name: Download CJK font
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          curl -fL -o NotoSansSC-Regular.otf "https://github.com/googlefonts/noto-cjk/raw/main/Sans/SubsetOTF/SC/NotoSansSC-Regular.otf" \
+            || curl -fL -o NotoSansSC-Regular.otf "https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/SC/NotoSansSC-Regular.otf" \
+            || (curl -sL "https://github.com/notofonts/noto-cjk/releases/download/Sans2.004/08_NotoSansCJKsc.zip" -o noto.zip && unzip -j noto.zip -d . "*.otf" && rm noto.zip)
+          ls -la NotoSansSC-Regular.otf
+
       - name: Build debug APK
         run: buildozer android debug --verbose
 
