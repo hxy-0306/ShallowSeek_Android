@@ -21,7 +21,7 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt update
-          sudo apt install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev unzip zip
+          sudo apt install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev unzip zip openjdk-17-jdk
 
       - name: Accept all Android SDK licenses
         run: |
