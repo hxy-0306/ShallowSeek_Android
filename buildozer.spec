@@ -21,4 +21,4 @@ android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
 
 android.permissions = 
 
-p4a.branch = master
+p4a.branch = v2024.01.21
