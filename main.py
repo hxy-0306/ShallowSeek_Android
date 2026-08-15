@@ -35,22 +35,20 @@ COLOR_CRAZY = (0.337, 0.831, 0.863, 1)
 COLOR_ERR = (0.973, 0.318, 0.290, 1)
 COLOR_DIM = (0.275, 0.298, 0.325, 1)
 
-_EMOJI_MAP = {
-    "🤖": "[AI]", "🧔": "[YOU]", "👾": "(外星人)", "🤖": "[AI]",
-    "👍": "(好)", "👋": "(挥手)", "👀": "(看)", "💥": "(爆炸)",
-    "😏": "(斜眼笑)", "🤪": "(离谱)", "🤔": "(思考)", "🧐": "(扶眼镜)",
-    "😥": "(哭)", "😎": "(墨镜)", "🙃": "(反笑)", "🎧": "(耳机)",
-    "😜": "[表情]", "😝": "[表情]", "🤑": "[表情]", "🤯": "[表情]",
-    "🤬": "[表情]", "😡": "[表情]", "👹": "[表情]", "👺": "[表情]",
-    "💩": "[表情]", "👻": "[表情]", "🎃": "[表情]",
-    "w(ﾟДﾟ)w": "(震惊)",
-}
-
 
 def _strip_emoji(text):
-    for k, v in _EMOJI_MAP.items():
-        text = text.replace(k, v)
-    return text
+    import unicodedata
+    text = text.replace('\ufe0e', '').replace('\ufe0f', '').replace('\u200d', '')
+    result = []
+    for ch in text:
+        cp = ord(ch)
+        name = unicodedata.name(ch, '')
+        if name.startswith('EMOJI') or name.startswith('VARIATION SELECTOR'):
+            continue
+        if 0x2600 <= cp <= 0x27BF or 0x1F000 <= cp <= 0x1FAFF:
+            continue
+        result.append(ch)
+    return ''.join(result)
 
 
 def _pick_cjk_font():
@@ -106,7 +104,7 @@ def pysum(s):
             return f"答案是：{num}"
         except Exception:
             return "俺不鸡道怎么算w(ﾟДﾟ)w"
-    return "算式太长了,俺拒绝计算🤪!"
+    return "算式太长了,俺拒绝计算!"
 
 
 def become_crazy():
@@ -137,13 +135,13 @@ def answer(question):
     if "发疯" in question or "疯狂" in question:
         if not is_crazy:
             is_crazy = True
-            return "如你所愿！我要疯了……哇哩哇哩哇！你好！我是疯狂戴夫！"
-        return "你说什么?告诉你，我已经疯狂了👾!"
+            return "如你所愿!我要疯了……哇哩哇哩哇!你好!我是疯狂戴夫!"
+        return "你说什么?告诉你,我已经疯狂了!"
     if "恢复" in question:
         if is_crazy:
             is_crazy = False
-            return "好!这就恢复正常👋"
-        return "你在说啥?我很正常啊🤔"
+            return "好!这就恢复正常"
+        return "你在说啥?我很正常啊"
 
     c = become_crazy()
     if c is not None:
@@ -151,15 +149,15 @@ def answer(question):
 
     try:
         q = question.replace("=", "").replace("?", "").replace("!", "")
-        q = q.replace(" ", "").replace("？", "").replace("！", "")
+        q = q.replace(" ", "").replace("?", "").replace("!", "")
         q = q.replace("等于", "").replace("几", "")
     except Exception:
         q = question
 
     if "刚刚" in q or "之前" in q or "刚才" in q:
         if last_say:
-            return f"刚才你问：「{last_say[0]}」，我回答：「{last_say[1]}」"
-        return "我们还什么都没聊呢🧐"
+            return f"刚才你问:「{last_say[0]}」,我回答:「{last_say[1]}」"
+        return "我们还什么都没聊呢"
 
     if re.search(r"\d+[+\-*/]\d+", q):
         return pysum(q)
@@ -181,8 +179,6 @@ def answer(question):
     return "\n".join(results)
 
 
-# ===== 游戏状态机 =====
-
 def start_rqs():
     return {
         "type": "rqs",
@@ -198,7 +194,7 @@ def step_rqs(state, user_choice):
         return ("请出石头、剪刀或布~", False)
 
     computer = random.choice(valid)
-    lines = [f"你出：{user_choice}，我出：{computer}"]
+    lines = [f"你出:{user_choice},我出:{computer}"]
 
     if computer == user_choice:
         winner = "平局"
@@ -218,13 +214,13 @@ def step_rqs(state, user_choice):
     if winner == "平局":
         lines.append("本轮平局")
     else:
-        lines.append(f"本轮{winner}赢了👍")
+        lines.append(f"本轮{winner}赢了")
 
     if state["c_not_win"] >= 3:
-        lines.append("嘤嘤😥，连输三把，不玩了！")
+        lines.append("嘤嘤,连输三把,不玩了!")
         state["done"] = True
     elif state["p_not_win"] >= 3:
-        lines.append("Sorry，连赢你3把，请不要生气哦😏")
+        lines.append("Sorry,连赢你3把,请不要生气哦")
         state["done"] = True
 
     return ("\n".join(lines), state["done"])
@@ -238,7 +234,7 @@ def start_guess_n():
         "type": "guess",
         "g_number": g_number,
         "remaining": 5,
-        "hint": f"我想了一个数字，它在 {s_number} 和 {b_number} 之间，你来猜吧！",
+        "hint": f"我想了一个数字,它在 {s_number} 和 {b_number} 之间,你来猜吧!",
         "done": False,
     }
 
@@ -252,13 +248,13 @@ def step_guess_n(state, text):
 
     if n == state["g_number"]:
         state["done"] = True
-        return (f"猜对了！答案就是 {state['g_number']}！", True)
+        return (f"猜对了!答案就是 {state['g_number']}!", True)
 
     if state["remaining"] == 0:
         state["done"] = True
-        return (f"机会用完了，正确答案是 {state['g_number']}，游戏结束！", True)
+        return (f"机会用完了,正确答案是 {state['g_number']},游戏结束!", True)
 
-    return (f"不对哦，还有 {state['remaining']} 次机会。再猜：", False)
+    return (f"不对哦,还有 {state['remaining']} 次机会。再猜:", False)
 
 
 def start_math():
@@ -297,37 +293,37 @@ def step_math(state, text):
 
     if spend > 10:
         state["done"] = True
-        lines = [f"哦哦，你用了{spend}秒，超时啦！"]
-        lines.append(f"这场挑战，你答对了{state['right']}道题。")
-        lines.append(f"你最快的一次，只用了{state['min_time']}秒。")
-        lines.append("恭喜你！勇士！")
+        lines = [f"哦哦,你用了{spend}秒,超时啦!"]
+        lines.append(f"这场挑战,你答对了{state['right']}道题。")
+        lines.append(f"你最快的一次,只用了{state['min_time']}秒。")
+        lines.append("恭喜你!勇士!")
         return ("\n".join(lines), True)
 
     if text == "n":
         state["done"] = True
-        lines = ["好吧，这题你不会，进入结算："]
-        lines.append(f"这场挑战，你答对了{state['right']}道题。")
-        lines.append(f"你最快的一次，只用了{state['min_time']}秒。")
-        lines.append("恭喜你！勇士！")
+        lines = ["好吧,这题你不会,进入结算:"]
+        lines.append(f"这场挑战,你答对了{state['right']}道题。")
+        lines.append(f"你最快的一次,只用了{state['min_time']}秒。")
+        lines.append("恭喜你!勇士!")
         return ("\n".join(lines), True)
 
     try:
         n = int(text)
     except ValueError:
         state["done"] = True
-        return ("有违规字符，犯规了！游戏结束", True)
+        return ("有违规字符,犯规了!游戏结束", True)
 
     if n == state["answer"]:
         state["right"] += 1
         state["expr"], state["answer"] = _make_expr()
         state["start_ts"] = time.time()
-        return (f"答对啦！下一题👍\n算式 '{state['expr']}=?' 的结果：", False)
+        return (f"答对啦!下一题\n算式 '{state['expr']}=?' 的结果:", False)
     else:
         state["done"] = True
-        lines = ["不好！你答错啦！游戏结束👋"]
-        lines.append(f"这场挑战，你答对了{state['right']}道题。")
-        lines.append(f"你最快的一次，只用了{state['min_time']}秒。")
-        lines.append("恭喜你！勇士！")
+        lines = ["不好!你答错啦!游戏结束"]
+        lines.append(f"这场挑战,你答对了{state['right']}道题。")
+        lines.append(f"你最快的一次,只用了{state['min_time']}秒。")
+        lines.append("恭喜你!勇士!")
         return ("\n".join(lines), True)
 
 
@@ -336,13 +332,13 @@ def get_game_prompt(state):
         return "说点什么..."
     t = state["type"]
     if t == "rqs":
-        return "你出石头、剪刀还是布？"
+        return "你出石头、剪刀还是布?"
     if t == "guess":
-        return f"猜数字（剩{state['remaining']}次）:"
+        return f"猜数字(剩{state['remaining']}次):"
     if t == "math":
         if state["expr"]:
             return f"{state['expr']}=?"
-        return "准备好速算了吗？"
+        return "准备好速算了吗?"
     return "说点什么..."
 
 
@@ -357,8 +353,6 @@ def step_game(state, text):
     return ("", True)
 
 
-# ===== UI =====
-
 if KIVY_AVAILABLE:
     Window.clearcolor = BG
     Window.softinput_mode = 'below_target'
@@ -371,15 +365,16 @@ if KIVY_AVAILABLE:
             self.markup = True
             self.font_size = dp(15)
             self.size_hint_y = None
-            self.bind(text=self._recalc)
+            self.bind(text=self._schedule_recalc,
+                      width=self._schedule_recalc,
+                      size=self._schedule_recalc)
             if CJK_FONT:
                 self.font_name = CJK_FONT
 
-        def _recalc(self, *_):
-            self.text_size = (self.width, None)
-            self.height = max(dp(24), self.texture_size[1] + dp(8))
+        def _schedule_recalc(self, *_):
+            Clock.schedule_once(self._do_recalc, 0)
 
-        def on_size(self, *a):
+        def _do_recalc(self, *_):
             self.text_size = (self.width, None)
             self.height = max(dp(24), self.texture_size[1] + dp(8))
 
@@ -492,7 +487,7 @@ if KIVY_AVAILABLE:
             return root
 
         def _add_welcome(self):
-            self._add_ai("嗨！我是 ShallowSeek(浅度求索)，有什么可以帮你的吗？", instant=True)
+            self._add_ai("嗨!我是 ShallowSeek(浅度求索),有什么可以帮你的吗?", instant=True)
             self._add_ai("试试: 你好 / 猜数字 / 石头剪刀布 / 速算 / 发疯 / 1+1=?", instant=True)
 
         def _add_user(self, text):
@@ -571,18 +566,18 @@ if KIVY_AVAILABLE:
             if result is None:
                 if "速算" in text or "挑战" in text or "数学" in text:
                     self.game_state = start_math()
-                    self._add_ai("速算挑战开始！十秒内答题！输入 n 跳过，答错或超时结束。")
-                    self._add_ai(f"算式 '{self.game_state['expr']}=?' 的结果：", instant=True)
+                    self._add_ai("速算挑战开始!十秒内答题!输入 n 跳过,答错或超时结束。")
+                    self._add_ai(f"算式 '{self.game_state['expr']}=?' 的结果:", instant=True)
                 elif "石头剪刀布" in text or "猜拳" in text:
                     self.game_state = start_rqs()
-                    self._add_ai("石头剪刀布开始！连输/连赢3把结束。你出石头、剪刀还是布？")
+                    self._add_ai("石头剪刀布开始!连输/连赢3把结束。你出石头、剪刀还是布?")
                 elif "猜数字" in text:
                     self.game_state = start_guess_n()
                     self._add_ai(self.game_state["hint"])
                 elif "游戏" in text:
                     if random.randint(0, 1) == 0:
                         self.game_state = start_rqs()
-                        self._add_ai("好嘞，石头剪刀布！你出石头、剪刀还是布？")
+                        self._add_ai("好嘞,石头剪刀布!你出石头、剪刀还是布?")
                     else:
                         self.game_state = start_guess_n()
                         self._add_ai(self.game_state["hint"])
@@ -616,17 +611,17 @@ def run_cli():
             time.sleep(0.03)
         print(end, end='', flush=True)
 
-    char_print(f"ShallowSeek v{V} 启动完成！输入 h 看帮助\n")
+    char_print(f"ShallowSeek v{V} 启动完成!输入 h 看帮助\n")
     while True:
         try:
             t = input("[YOU]: ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n再见！")
+            print("\n再见!")
             break
         if not t:
             continue
         if t in ("e", "exit", "quit"):
-            print("再见啦！")
+            print("再见啦!")
             break
         if t == "h":
             print("试试: 你好 / 猜数字 / 石头剪刀布 / 速算 / 发疯 / 1+1=? / 恢复")
@@ -651,6 +646,6 @@ if __name__ == "__main__":
     if KIVY_AVAILABLE:
         run_kivy()
     else:
-        print("Kivy 未安装，运行终端模式...")
+        print("Kivy 未安装,运行终端模式...")
         print("pip install kivy  可启用 GUI")
         run_cli()
