@@ -17,16 +17,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev unzip zip openjdk-17-jdk
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-
-      - name: Point buildozer to preinstalled SDK + accept licenses
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-        run: |
-          yes | sudo $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
-          yes | sudo $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "build-tools;33.0.2" "platforms;android-33" 2>/dev/null || true
-          echo "ANDROIDSDK=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-          echo "ANDROIDAPKSRC=/usr/local/lib/android/sdk" >> $GITHUB_ENV
 
       - name: Install buildozer
         run: pip install --upgrade buildozer cython
