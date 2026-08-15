@@ -17,7 +17,6 @@ android.minapi = 21
 android.buildtools = 34.0.0
 android.archs = arm64-v8a, armeabi-v7a
 android.sdk_path = /usr/local/lib/android/sdk
-android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
 
 android.permissions = 
 
