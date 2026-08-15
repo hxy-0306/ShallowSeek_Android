@@ -18,6 +18,16 @@ jobs:
           sudo apt update
           sudo apt install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev unzip zip openjdk-17-jdk
 
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          ls -la /usr/local/lib/android/sdk/
+          ls -la /usr/local/lib/android/sdk/cmdline-tools/
+          ln -s /usr/local/lib/android/sdk/cmdline-tools/latest /usr/local/lib/android/sdk/tools
+          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=/usr/local/lib/android/sdk --licenses > /dev/null
+          ls -la /usr/local/lib/android/sdk/tools/bin/sdkmanager
+
       - name: Install buildozer
         run: pip install --upgrade buildozer cython
 
