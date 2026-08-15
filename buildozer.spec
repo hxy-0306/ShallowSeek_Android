@@ -4,7 +4,7 @@ title = ShallowSeek
 package.name = shallowseek
 package.domain = org.local
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,ttf,otf,ttc
 version = 1.3
 
 requirements = python3,kivy

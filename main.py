@@ -2,6 +2,9 @@ import random
 import re
 
 try:
+    from kivy.config import Config
+    Config.set('kivy', 'keyboard_mode', 'system')
+
     from kivy.app import App
     from kivy.uix.boxlayout import BoxLayout
     from kivy.uix.label import Label
@@ -32,19 +35,58 @@ COLOR_CRAZY = (0.337, 0.831, 0.863, 1)
 COLOR_ERR = (0.973, 0.318, 0.290, 1)
 COLOR_DIM = (0.275, 0.298, 0.325, 1)
 
+_EMOJI_MAP = {
+    "🤖": "[AI]", "🧔": "[YOU]", "👾": "(外星人)", "🤖": "[AI]",
+    "👍": "(好)", "👋": "(挥手)", "👀": "(看)", "💥": "(爆炸)",
+    "😏": "(斜眼笑)", "🤪": "(离谱)", "🤔": "(思考)", "🧐": "(扶眼镜)",
+    "😥": "(哭)", "😎": "(墨镜)", "🙃": "(反笑)", "🎧": "(耳机)",
+    "😜": "[表情]", "😝": "[表情]", "🤑": "[表情]", "🤯": "[表情]",
+    "🤬": "[表情]", "😡": "[表情]", "👹": "[表情]", "👺": "[表情]",
+    "💩": "[表情]", "👻": "[表情]", "🎃": "[表情]",
+    "w(ﾟДﾟ)w": "(震惊)",
+}
+
+
+def _strip_emoji(text):
+    for k, v in _EMOJI_MAP.items():
+        text = text.replace(k, v)
+    return text
+
 
 def _pick_cjk_font():
+    import os
+    try:
+        from kivy.core.text import LabelBase
+    except ImportError:
+        return None
+
+    try:
+        font_dir = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        font_dir = os.getcwd()
+
+    try:
+        for name in sorted(os.listdir(font_dir)):
+            if name.lower().endswith(('.ttf', '.otf', '.ttc')):
+                fpath = os.path.join(font_dir, name)
+                try:
+                    LabelBase.register(name='ShallowSeekCJK', fn_regular=fpath)
+                    return 'ShallowSeekCJK'
+                except Exception:
+                    continue
+    except Exception:
+        pass
+
     candidates = [
         "Noto Sans CJK SC", "Noto Sans CJK", "Noto Sans SC",
         "Droid Sans Fallback", "Droid Sans Chinese", "WenQuanYi Micro Hei",
         "Microsoft YaHei", "SimHei", "PingFang SC", "Heiti SC",
         "Arial Unicode MS",
     ]
-    for name in candidates:
+    for cname in candidates:
         try:
-            from kivy.core.text import Label as KivyLabel
-            KivyLabel.register(name)
-            return name
+            LabelBase.register(cname)
+            return cname
         except Exception:
             continue
     return None
@@ -319,6 +361,7 @@ def step_game(state, text):
 
 if KIVY_AVAILABLE:
     Window.clearcolor = BG
+    Window.softinput_mode = 'below_target'
     CJK_FONT = _pick_cjk_font()
 
     class ChatBubble(Label):
@@ -356,7 +399,7 @@ if KIVY_AVAILABLE:
         def start(self):
             self._i = 0
             self._dots = ""
-            self.text = "🤖 正在思考中"
+            self.text = "[AI] 正在思考中"
             self._event = Clock.schedule_interval(self._tick, 0.3)
 
         def stop(self):
@@ -373,7 +416,7 @@ if KIVY_AVAILABLE:
             self._dots += "."
             if len(self._dots) > 3:
                 self._dots = "."
-            self.text = f"🤖 正在思考中{self._dots}"
+            self.text = f"[AI] 正在思考中{self._dots}"
 
     class ShallowSeekApp(App):
         title = "ShallowSeek"
@@ -428,6 +471,7 @@ if KIVY_AVAILABLE:
                 size_hint_x=1,
                 font_size=dp(15),
                 write_tab=False,
+                input_type='text',
             )
             if CJK_FONT:
                 self.input.font_name = CJK_FONT
@@ -452,12 +496,13 @@ if KIVY_AVAILABLE:
             self._add_ai("试试: 你好 / 猜数字 / 石头剪刀布 / 速算 / 发疯 / 1+1=?", instant=True)
 
         def _add_user(self, text):
-            w = ChatBubble(text=f"[color=#8b949e]🧔: {text}[/color]",
+            w = ChatBubble(text=f"[color=#8b949e][YOU]: {text}[/color]",
                            bubble_color=COLOR_USER)
             self.msg_box.add_widget(w)
             self._scroll_to_bottom()
 
         def _add_ai(self, text, instant=False, color=None):
+            text = _strip_emoji(text)
             if color is None:
                 if is_crazy:
                     color = COLOR_CRAZY
@@ -467,8 +512,8 @@ if KIVY_AVAILABLE:
                     color = COLOR_AI
 
             hex_color = f"{int(color[0]*255):02x}{int(color[1]*255):02x}{int(color[2]*255):02x}"
-            full_markup = f"[color=#{hex_color}]🤖: {text}[/color]"
-            plain_body = f"🤖: {text}"
+            full_markup = f"[color=#{hex_color}][AI]: {text}[/color]"
+            plain_body = f"[AI]: {text}"
 
             if instant:
                 w = ChatBubble(text=full_markup, bubble_color=color)
@@ -480,7 +525,7 @@ if KIVY_AVAILABLE:
             self._typing_plain = plain_body
             self._typing_full = full_markup
             self._typing_idx = 0
-            w = ChatBubble(text="🤖:", bubble_color=color)
+            w = ChatBubble(text="[AI]:", bubble_color=color)
             w.markup = False
             self.msg_box.add_widget(w)
             self._typing_widget = w
@@ -574,7 +619,7 @@ def run_cli():
     char_print(f"ShallowSeek v{V} 启动完成！输入 h 看帮助\n")
     while True:
         try:
-            t = input("🧔: ").strip()
+            t = input("[YOU]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\n再见！")
             break
@@ -593,11 +638,12 @@ def run_cli():
         result = answer(t)
         if result is None:
             continue
-        prefix = "🤖: "
+        result = _strip_emoji(result)
+        prefix = "[AI]: "
         if is_crazy:
-            prefix = "🤖[疯]: "
+            prefix = "[AI][疯]: "
         elif result in ERROR_A:
-            prefix = "🤖[错]: "
+            prefix = "[AI][错]: "
         char_print(prefix + result + "\n")
 
 
