@@ -7,7 +7,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 1.3
 
-requirements = python3,kivy
+requirements = python3==3.11.9,kivy
 
 orientation = portrait
 fullscreen = 0
@@ -20,3 +20,5 @@ android.sdk_path = /usr/local/lib/android/sdk
 android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
 
 android.permissions = 
+
+p4a.branch = master
