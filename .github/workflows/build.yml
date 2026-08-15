@@ -16,7 +16,7 @@ jobs:
       - name: Install deps
         run: |
           sudo apt update
-          sudo apt install -y autoconf automake m4 libtool libtool-bin gettext pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev unzip zip openjdk-17-jdk
+          sudo apt install -y autoconf automake m4 libtool libtool-bin libltdl-dev autoconf-archive gettext pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev unzip zip openjdk-17-jdk
 
       - name: Clean old buildozer cache
         run: rm -rf .buildozer ~/.buildozer/android/platform/android-ndk-r28c
@@ -46,4 +46,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-logs
-          path: .buildozer/**/*.txt
+          path: |
+            .buildozer/**/*.txt
+            .buildozer/**/*.log
